@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏠 Unser Zuhause</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f1ec;--surface:#ffffff;--surface2:#f9f7f4;
+  --border:#e4ddd3;--border2:#ede8e0;
+  --ink:#2c2825;--ink2:#6b6460;--ink3:#a09890;
+  --green:#3a8c68;--green-bg:#edf7f2;--green-bdr:#b8deca;
+  --amber:#b5820a;--amber-bg:#fdf6e3;--amber-bdr:#e8d080;
+  --red:#c0392b;--red-bg:#fdf0ee;--red-bdr:#f0b8b2;
+  --accent:#4a7fa5;--accent-bg:#eef4f9;--accent-bdr:#c0d9ed;
+  --shadow:0 1px 4px rgba(44,40,37,.07),0 4px 16px rgba(44,40,37,.05);
+  --shadow-sm:0 1px 3px rgba(44,40,37,.08);
+  --r:12px;--rs:8px;
+}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Loading */
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:14px}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite}
+#loading p{color:var(--ink2);font-size:14px}
+
+/* App */
+#app{display:none;animation:fadeIn .3s ease}
+
+/* Header */
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:16px 24px;display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:12px;
+  box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100
+}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-icon{font-size:32px;line-height:1}
+.hdr-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink)}
+.hdr-sub{font-size:12px;color:var(--ink3);margin-top:1px}
+.sync-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sync-badge{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid;font-weight:700;white-space:nowrap}
+.sync-badge.ok{color:var(--green);background:var(--green-bg);border-color:var(--green-bdr)}
+.sync-badge.syncing{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-bdr)}
+.sync-badge.error{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr)}
+.sync-badge.local{color:var(--ink2);background:var(--surface2);border-color:var(--border)}
+.btn-sync{width:30px;height:30px;border-radius:var(--rs);background:var(--surface2);border:1px solid var(--border);color:var(--ink2);font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.btn-sync:hover{background:var(--border2)}
+
+/* Nav */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+.tab-btn{display:flex;align-items:center;gap:6px;padding:12px 18px;background:transparent;border:none;color:var(--ink3);font-size:13px;font-weight:700;white-space:nowrap;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;letter-spacing:.2px}
+.tab-btn:hover{color:var(--ink2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-icon{font-size:16px}
+
+/* Main */
+main{max-width:860px;margin:0 auto;padding:24px 16px 80px}
+.tab-pane{display:none;animation:fadeIn .2s ease}
+.tab-pane.active{display:block}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.card-title{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px}
+
+/* Stat bar */
+.stat-bar{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;box-shadow:var(--shadow-sm);overflow:hidden;flex-wrap:wrap}
+.stat-item{flex:1;min-width:80px;text-align:center;padding:12px 8px;border-right:1px solid var(--border2)}
+.stat-item:last-child{border-right:none}
+.stat-num{display:block;font-size:22px;font-weight:900;color:var(--ink);line-height:1.1}
+.stat-num.green{color:var(--green)}.stat-num.red{color:var(--red)}
+.stat-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+
+/* Form */
+.field-label{display:block;font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.field-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--surface2);color:var(--ink);font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(74,127,165,.1);background:var(--surface)}
+select.field-input{cursor:pointer}
+textarea.field-input{resize:vertical;min-height:90px;line-height:1.6}
+.add-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;margin-bottom:14px;animation:fadeIn .2s ease}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:var(--rs);font-size:13px;font-weight:700;border:none;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#3a6f93;box-shadow:0 2px 8px rgba(74,127,165,.3)}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--ink2);padding:5px 12px;font-size:12px}
+.btn-ghost:hover{background:var(--border2)}
+.btn-green{background:var(--green-bg);border:1px solid var(--green-bdr);color:var(--green);font-size:12px;padding:4px 10px}
+.btn-green:hover{background:#d4eddf}
+.btn-danger{background:var(--red-bg);border:1px solid var(--red-bdr);color:var(--red);font-size:12px;padding:5px 12px;font-size:13px;font-weight:700;border-radius:var(--rs)}
+.btn-danger:hover{background:#fde0dc}
+.btn-gold{background:#f0c040;border:none;color:#4a3800;font-weight:700;font-size:13px;padding:9px 18px;border-radius:var(--rs)}
+.btn-gold:hover{background:#e0b030}
+.btn-x{background:transparent;border:none;color:var(--ink3);font-size:13px;padding:4px 7px;border-radius:5px;cursor:pointer}
+.btn-x:hover{background:var(--red-bg);color:var(--red)}
+
+/* Row items */
+.row-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--rs);background:var(--surface2);border:1px solid var(--border2);margin-bottom:6px;transition:border-color .15s}
+.row-item:hover{border-color:var(--border)}
+.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.row-name{display:block;font-size:13px;font-weight:700;color:var(--ink)}
+.row-name.muted{font-weight:400;color:var(--ink2)}
+.row-meta{display:block;font-size:11px;color:var(--ink3);margin-top:1px}
+.row-info{flex:1;min-width:0}
+
+/* Checkbox */
+.checkbox{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:var(--surface);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .15s}
+.checkbox.done{background:var(--green);border-color:var(--green);color:#fff}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid}
+.tag-green{color:var(--green);background:var(--green-bg);border-color:var(--green-bdr)}
+.tag-amber{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-bdr)}
+.tag-red{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr)}
+.tag-blue{color:var(--accent);background:var(--accent-bg);border-color:var(--accent-bdr)}
+.tag-gray{color:var(--ink2);background:var(--surface2);border-color:var(--border)}
+
+/* Progress */
+.progress-track{height:9px;background:var(--border2);border-radius:5px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:5px;transition:width .4s ease}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:9px 10px;border-bottom:2px solid var(--border);font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px}
+.data-table td{padding:8px 10px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.tbl-input{padding:5px 8px;border-radius:6px;border:1.5px solid var(--border);background:var(--surface2);color:var(--ink);font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}
+.tbl-input:focus{border-color:var(--accent);background:var(--surface)}
+
+/* Essen */
+.essen-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border2)}
+.essen-row:last-child{border-bottom:none;padding-bottom:0}
+.essen-label{font-size:12px;color:var(--ink2);width:120px;flex-shrink:0;font-weight:700}
+.essen-val{flex:1;font-size:13px;cursor:pointer;padding:5px 9px;border-radius:6px;color:var(--ink);background:var(--surface2);border:1.5px solid transparent;transition:all .15s;min-height:32px;display:flex;align-items:center}
+.essen-val:hover{border-color:var(--border);background:var(--surface)}
+.essen-val.empty{color:var(--ink3);font-style:italic}
+.essen-input{flex:1;padding:5px 9px;border-radius:6px;border:2px solid var(--accent);background:var(--surface);color:var(--ink);font-size:13px;outline:none;box-shadow:0 0 0 3px rgba(74,127,165,.1);font-family:inherit}
+.today-card{border:2px solid var(--accent)!important}
+.today-label{color:var(--accent)!important}
+
+/* Flex utils */
+.flex{display:flex}.flex-center{display:flex;align-items:center}
+.flex-wrap{flex-wrap:wrap}.flex-1{flex:1}
+.gap-8{gap:8px}.gap-12{gap:12px}
+.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}
+.mt-6{margin-top:6px}
+
+/* Empty */
+.empty-hint{font-size:13px;color:var(--ink3);font-style:italic;padding:10px 4px}
+
+@media(max-width:600px){
+  header{padding:12px 16px}
+  main{padding:16px 12px 80px}
+  .tab-btn span:last-child{display:none}
+  .tab-btn{padding:12px 14px}
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Lade Haushaltsdaten…</p>
+</div>
+
+<div id="app">
+  <header>
+    <div class="hdr-left">
+      <span class="hdr-icon">🏠</span>
+      <div>
+        <div class="hdr-title">Unser Zuhause</div>
+        <div class="hdr-sub">Haushaltsplaner für Euch beide</div>
+      </div>
+    </div>
+    <div class="sync-wrap">
+      <span id="sync-badge" class="sync-badge local">⏳ Lädt…</span>
+      <button class="btn-sync" onclick="manualSync()" title="Synchronisieren">↻</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" onclick="switchTab('putz')"   id="tab-putz">
+      <span class="tab-icon">🧹</span><span>Putzplan</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('einkauf')" id="tab-einkauf">
+      <span class="tab-icon">🛒</span><span>Einkauf</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('essen')"   id="tab-essen">
+      <span class="tab-icon">🍽️</span><span>Essensplan</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('hanno')"   id="tab-hanno">
+      <span class="tab-icon">👶</span><span>Hanno</span>
+    </button>
+  </nav>
+
+  <main>
+    <div class="tab-pane active" id="pane-putz"></div>
+    <div class="tab-pane"        id="pane-einkauf"></div>
+    <div class="tab-pane"        id="pane-essen"></div>
+    <div class="tab-pane"        id="pane-hanno"></div>
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  ⚙️  SUPABASE KONFIGURATION — hier eure Zugangsdaten eintragen
+// ═══════════════════════════════════════════════════════════════════
+const SUPABASE_URL  = "EURE_SUPABASE_URL";       // z.B. https://abcdef.supabase.co
+const SUPABASE_ANON = "EUER_SUPABASE_ANON_KEY";  // Project Settings → API → anon public
+const TABLE         = "haushaltsplaner";
+
+/*
+  SUPABASE EINRICHTEN (einmalig, ~5 Minuten):
+  ──────────────────────────────────────────
+  1. Kostenloser Account: https://supabase.com
+  2. Neues Projekt anlegen
+  3. SQL Editor → New Query → ausführen:
+
+     create table haushaltsplaner (
+       key        text primary key,
+       value      text not null,
+       updated_at timestamptz default now()
+     );
+     alter table haushaltsplaner enable row level security;
+     create policy "public_access" on haushaltsplaner
+       for all using (true) with check (true);
+
+  4. Project Settings → API:
+     → "Project URL"  → SUPABASE_URL oben eintragen
+     → "anon public"  → SUPABASE_ANON oben eintragen
+  5. Datei auf GitHub Pages hochladen — fertig!
+*/
+
+// ── DB-Helfer ────────────────────────────────────────────────────────────────
+const isConfigured = () => SUPABASE_URL !== "EURE_SUPABASE_URL";
+
+async function dbLoad(key) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?key=eq.${key}&select=value`, {
+      headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
+    });
+    const rows = await r.json();
+    return (Array.isArray(rows) && rows.length) ? JSON.parse(rows[0].value) : null;
+  } catch { return null; }
+}
+
+async function dbSave(key, data) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}`,
+        "Content-Type": "application/json", Prefer: "resolution=merge-duplicates"
+      },
+      body: JSON.stringify({ key, value: JSON.stringify(data), updated_at: new Date().toISOString() })
+    });
+  } catch {}
+}
+
+function lsLoad(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } }
+function lsSave(k, d) { try { localStorage.setItem(k, JSON.stringify(d)); } catch {} }
+
+async function loadData(k) { return isConfigured() ? await dbLoad(k) : lsLoad(k); }
+async function saveData(k, d) { isConfigured() ? await dbSave(k, d) : lsSave(k, d); }
+
+// ── Defaults ─────────────────────────────────────────────────────────────────
+const KEYS = { putz:"putz-v2", einkauf:"einkauf-v2", essen:"essen-v2", hanno:"hanno-v2" };
+
+const PUTZ_DEF = [
+  {id:1, raum:"Küche",         icon:"🍳", aufgaben:[
+    {id:11,name:"Arbeitsflächen wischen",letztesmal:null,intervall:2},
+    {id:12,name:"Herd reinigen",         letztesmal:null,intervall:7},
+    {id:13,name:"Kühlschrank",           letztesmal:null,intervall:14},
+    {id:14,name:"Spülbecken",            letztesmal:null,intervall:3}]},
+  {id:2, raum:"Wohnzimmer",    icon:"🛋️", aufgaben:[
+    {id:21,name:"Staubsaugen",   letztesmal:null,intervall:4},
+    {id:22,name:"Abstauben",     letztesmal:null,intervall:7},
+    {id:23,name:"Fenster putzen",letztesmal:null,intervall:30}]},
+  {id:3, raum:"Badezimmer",    icon:"🚿", aufgaben:[
+    {id:31,name:"Toilette reinigen",letztesmal:null,intervall:3},
+    {id:32,name:"Dusche / Wanne",  letztesmal:null,intervall:5},
+    {id:33,name:"Waschbecken",     letztesmal:null,intervall:4},
+    {id:34,name:"Boden wischen",   letztesmal:null,intervall:7}]},
+  {id:4, raum:"Schlafzimmer",  icon:"🛏️", aufgaben:[
+    {id:41,name:"Bettwäsche wechseln",letztesmal:null,intervall:14},
+    {id:42,name:"Staubsaugen",        letztesmal:null,intervall:7}]},
+  {id:5, raum:"Kinderzimmer",  icon:"🧸", aufgaben:[
+    {id:51,name:"Spielzeug aufräumen",  letztesmal:null,intervall:2},
+    {id:52,name:"Staubsaugen",          letztesmal:null,intervall:4},
+    {id:53,name:"Wickelbereich wischen",letztesmal:null,intervall:2},
+    {id:54,name:"Bettwäsche wechseln",  letztesmal:null,intervall:7},
+    {id:55,name:"Fenster lüften",       letztesmal:null,intervall:1}]},
+  {id:6, raum:"Flur & Allgemein", icon:"🚪", aufgaben:[
+    {id:61,name:"Böden wischen",   letztesmal:null,intervall:7},
+    {id:62,name:"Müll rausbringen",letztesmal:null,intervall:3}]}
+];
+
+const WOCHENTAGE = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+const ESSEN_DEF  = WOCHENTAGE.map((tag,i) => ({id:i+1,tag,fruehstueck:"",mittagessen:"",abendessen:"",snack:""}));
+const EINKAUF_DEF = {items:[]};
+const HANNO_DEF  = {
+  windeln: {stufe:"Größe 4",bestand:40,bestandMax:80,marke:"Pampers"},
+  kleidergroessen: [
+    {id:1,typ:"Bodys",    groesse:"74/80",naechste:"86/92",notiz:""},
+    {id:2,typ:"Hosen",    groesse:"74",   naechste:"80",   notiz:""},
+    {id:3,typ:"Strampler",groesse:"74/80",naechste:"86",   notiz:""},
+    {id:4,typ:"Jacken",   groesse:"80",   naechste:"86",   notiz:""},
+    {id:5,typ:"Schuhe",   groesse:"17",   naechste:"18",   notiz:""}
+  ],
+  anschaffungen: [
+    {id:1,name:"Hochstuhl",prioritaet:"hoch",  erledigt:false,notiz:"",preis:""},
+    {id:2,name:"Laufstall", prioritaet:"mittel",erledigt:false,notiz:"",preis:""}
+  ],
+  notizen:""
+};
+
+// ── Global state ──────────────────────────────────────────────────────────────
+let D = {putz:null, einkauf:null, essen:null, hanno:null};
+let timers = {};
+let essenEdit = null;
+let showAddAn = false;
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+const today   = () => new Date().toISOString().split("T")[0];
+const daysSince = d => d ? Math.floor((Date.now()-new Date(d).getTime())/86400000) : null;
+const fmtDate  = d => d ? new Date(d).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"2-digit"}) : "—";
+const todayTag = () => WOCHENTAGE[(new Date().getDay()+6)%7];
+const uid      = () => Date.now()+Math.floor(Math.random()*9999);
+const esc      = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const clone    = o => JSON.parse(JSON.stringify(o));
+
+function statusColor(ds, iv) {
+  if (ds===null) return "#b5820a";
+  if (ds <= iv*0.7) return "#3a8c68";
+  if (ds <= iv)     return "#b5820a";
+  return "#c0392b";
+}
+
+// ── Sync UI ───────────────────────────────────────────────────────────────────
+function setSyncUI(cls, txt) {
+  const el = document.getElementById("sync-badge");
+  el.className = "sync-badge "+cls; el.textContent = txt;
+}
+function setSyncOk() {
+  const t = new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+  setSyncUI(isConfigured()?"ok":"local", isConfigured()?`✓ Sync ${t}`:"💾 Lokal");
+}
+
+// ── Debounced save ────────────────────────────────────────────────────────────
+function scheduleSave(key, data, ms=700) {
+  clearTimeout(timers[key]);
+  setSyncUI("syncing","⏳ Speichert…");
+  timers[key] = setTimeout(async () => {
+    try { await saveData(key, data); setSyncOk(); }
+    catch { setSyncUI("error","⚠️ Fehler"); }
+  }, ms);
+}
+const savePutz    = () => { scheduleSave(KEYS.putz,    D.putz);    renderPutz(); };
+const saveEinkauf = () => { scheduleSave(KEYS.einkauf, D.einkauf); renderEinkauf(); };
+const saveEssen   = () => { scheduleSave(KEYS.essen,   D.essen);   renderEssen(); };
+const saveHanno   = () => { scheduleSave(KEYS.hanno,   D.hanno);   renderHanno(); };
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  setSyncUI("syncing","⏳ Lädt…");
+  const [p,e,es,h] = await Promise.all([
+    loadData(KEYS.putz), loadData(KEYS.einkauf), loadData(KEYS.essen), loadData(KEYS.hanno)
+  ]);
+  D.putz    = p  || clone(PUTZ_DEF);
+  D.einkauf = e  || clone(EINKAUF_DEF);
+  D.essen   = es || clone(ESSEN_DEF);
+  D.hanno   = h  || clone(HANNO_DEF);
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  renderAll(); setSyncOk();
+  if (isConfigured()) setInterval(manualSync, 20000);
+}
+
+async function manualSync() {
+  setSyncUI("syncing","⏳ Sync…");
+  try {
+    const [p,e,es,h] = await Promise.all([
+      loadData(KEYS.putz), loadData(KEYS.einkauf), loadData(KEYS.essen), loadData(KEYS.hanno)
+    ]);
+    if(p)  D.putz    = p;
+    if(e)  D.einkauf = e;
+    if(es) D.essen   = es;
+    if(h)  D.hanno   = h;
+    renderAll(); setSyncOk();
+  } catch { setSyncUI("error","⚠️ Fehler"); }
+}
+
+function renderAll() { renderPutz(); renderEinkauf(); renderEssen(); renderHanno(); }
+
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  document.getElementById("pane-"+name).classList.add("active");
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  🧹  PUTZPLAN
+// ══════════════════════════════════════════════════════════════════════════════
+function renderPutz() {
+  const allA    = D.putz.flatMap(r => r.aufgaben);
+  const overdue = allA.filter(a => { const d=daysSince(a.letztesmal); return d===null||d>a.intervall; }).length;
+  let html = `
+    <div class="stat-bar">
+      <div class="stat-item"><span class="stat-num">${allA.length}</span><span class="stat-label">Aufgaben</span></div>
+      <div class="stat-item"><span class="stat-num ${overdue>0?'red':'green'}">${overdue}</span><span class="stat-label">Überfällig</span></div>
+      <div class="stat-item"><span class="stat-num green">${allA.length-overdue}</span><span class="stat-label">Erledigt ✓</span></div>
+    </div>`;
+
+  D.putz.forEach(raum => {
+    html += `<div class="card">
+      <div class="card-head">
+        <div class="card-title">${raum.icon} ${esc(raum.raum)}</div>
+        <button class="btn btn-ghost" onclick="togglePutzAdd(${raum.id})">+ Aufgabe</button>
+      </div>
+      <div id="putz-add-${raum.id}" style="display:none" class="add-box">
+        <div class="flex gap-8 mb-8">
+          <input id="pn-${raum.id}" class="field-input flex-1" placeholder="Neue Aufgabe…"
+            onkeydown="if(event.key==='Enter')addPutz(${raum.id})">
+          <input id="pi-${raum.id}" class="field-input" style="width:80px" type="number" value="7" min="1">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--ink2)">Intervall (Tage)</span>
+          <button class="btn btn-primary" style="margin-left:auto" onclick="addPutz(${raum.id})">✓ Hinzufügen</button>
+        </div>
+      </div>`;
+    if (!raum.aufgaben.length) html += `<p class="empty-hint">Noch keine Aufgaben</p>`;
+    raum.aufgaben.forEach(a => {
+      const ds    = daysSince(a.letztesmal);
+      const color = statusColor(ds, a.intervall);
+      const over  = ds===null||ds>a.intervall;
+      const meta  = ds===null ? "Noch nie erledigt" : `Zuletzt: ${fmtDate(a.letztesmal)} · vor ${ds} Tag${ds===1?"":"en"}`;
+      html += `<div class="row-item">
+        <div class="status-dot" style="background:${color}"></div>
+        <div class="row-info">
+          <span class="row-name ${over?'':'muted'}">${esc(a.name)}</span>
+          <span class="row-meta">${meta} · alle ${a.intervall} Tage</span>
+        </div>
+        <button class="btn btn-green" onclick="markPutz(${raum.id},${a.id})">✓ Heute</button>
+        <button class="btn-x" onclick="delPutz(${raum.id},${a.id})">✕</button>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById("pane-putz").innerHTML = html;
+}
+
+function togglePutzAdd(id) {
+  const el = document.getElementById("putz-add-"+id);
+  const show = el.style.display==="none";
+  el.style.display = show ? "block" : "none";
+  if (show) document.getElementById("pn-"+id).focus();
+}
+function markPutz(rId,aId) {
+  D.putz = D.putz.map(r => r.id!==rId ? r : {...r, aufgaben:r.aufgaben.map(a => a.id!==aId?a:{...a,letztesmal:today()})});
+  savePutz();
+}
+function addPutz(rId) {
+  const name = document.getElementById("pn-"+rId).value.trim();
+  const iv   = parseInt(document.getElementById("pi-"+rId).value)||7;
+  if (!name) return;
+  D.putz = D.putz.map(r => r.id!==rId ? r : {...r, aufgaben:[...r.aufgaben,{id:uid(),name,letztesmal:null,intervall:iv}]});
+  savePutz();
+}
+function delPutz(rId,aId) {
+  D.putz = D.putz.map(r => r.id!==rId ? r : {...r, aufgaben:r.aufgaben.filter(a=>a.id!==aId)});
+  savePutz();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  🛒  EINKAUF
+// ══════════════════════════════════════════════════════════════════════════════
+function renderEinkauf() {
+  const items = D.einkauf.items || [];
+  const open  = items.filter(i=>!i.erledigt);
+  const done  = items.filter(i=> i.erledigt);
+
+  let html = `
+    <div class="stat-bar">
+      <div class="stat-item"><span class="stat-num">${items.length}</span><span class="stat-label">Gesamt</span></div>
+      <div class="stat-item"><span class="stat-num">${open.length}</span><span class="stat-label">Offen</span></div>
+      <div class="stat-item"><span class="stat-num green">${done.length}</span><span class="stat-label">Im Wagen ✓</span></div>
+    </div>
+    <div class="card">
+      <div class="add-box" style="margin-bottom:0">
+        <div class="flex gap-8 flex-wrap">
+          <input id="ei-name" class="field-input flex-1" style="min-width:160px"
+            placeholder="Artikel hinzufügen…" onkeydown="if(event.key==='Enter')addEinkauf()">
+          <input id="ei-menge" class="field-input" style="width:110px"
+            placeholder="Menge (opt.)" onkeydown="if(event.key==='Enter')addEinkauf()">
+          <button class="btn btn-primary" onclick="addEinkauf()">+ Hinzufügen</button>
+        </div>
+      </div>
+    </div>`;
+
+  if (open.length) {
+    html += `<div class="card"><div class="card-head" style="margin-bottom:10px">
+      <div class="card-title">📋 Noch zu kaufen <span class="tag tag-blue" style="margin-left:4px">${open.length}</span></div>
+    </div>`;
+    open.forEach(i => { html += einkaufRow(i); });
+    html += `</div>`;
+  }
+  if (done.length) {
+    html += `<div class="card" style="opacity:.75"><div class="card-head" style="margin-bottom:10px">
+      <div class="card-title" style="color:var(--green)">✓ Im Wagen <span class="tag tag-green" style="margin-left:4px">${done.length}</span></div>
+      <button class="btn btn-danger" onclick="clearDoneEinkauf()">Erledigte löschen</button>
+    </div>`;
+    done.forEach(i => { html += einkaufRow(i); });
+    html += `</div>`;
+  }
+  if (!items.length) {
+    html += `<div class="card" style="text-align:center;padding:40px">
+      <div style="font-size:40px;margin-bottom:10px">🛒</div>
+      <p style="color:var(--ink3)">Liste ist leer — füge oben Artikel hinzu</p>
+    </div>`;
+  }
+  document.getElementById("pane-einkauf").innerHTML = html;
+}
+
+function einkaufRow(item) {
+  return `<div class="row-item" style="${item.erledigt?'opacity:.5':''}">
+    <button class="checkbox ${item.erledigt?'done':''}" onclick="toggleEinkauf(${item.id})">${item.erledigt?"✓":""}</button>
+    <span style="flex:1;font-size:14px;${item.erledigt?'text-decoration:line-through;color:var(--ink2)':''}">${esc(item.name)}</span>
+    ${item.menge?`<span class="tag tag-gray">${esc(item.menge)}</span>`:""}
+    <button class="btn-x" onclick="delEinkauf(${item.id})">✕</button>
+  </div>`;
+}
+
+function addEinkauf() {
+  const name  = document.getElementById("ei-name").value.trim();
+  const menge = document.getElementById("ei-menge").value.trim();
+  if (!name) return;
+  D.einkauf.items.push({id:uid(),name,menge,erledigt:false});
+  document.getElementById("ei-name").value = "";
+  document.getElementById("ei-menge").value = "";
+  saveEinkauf();
+  setTimeout(()=>document.getElementById("ei-name")?.focus(),50);
+}
+function toggleEinkauf(id) {
+  D.einkauf.items = D.einkauf.items.map(i=>i.id===id?{...i,erledigt:!i.erledigt}:i);
+  saveEinkauf();
+}
+function delEinkauf(id) {
+  D.einkauf.items = D.einkauf.items.filter(i=>i.id!==id);
+  saveEinkauf();
+}
+function clearDoneEinkauf() {
+  D.einkauf.items = D.einkauf.items.filter(i=>!i.erledigt);
+  saveEinkauf();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  🍽️  ESSENSPLAN
+// ══════════════════════════════════════════════════════════════════════════════
+const MEALS = [
+  {key:"fruehstueck",label:"☀️ Frühstück"},
+  {key:"mittagessen",label:"🌞 Mittagessen"},
+  {key:"abendessen", label:"🌙 Abendessen"},
+  {key:"snack",      label:"🍎 Snack"},
+];
+
+function renderEssen() {
+  const tn = todayTag();
+  let html = `<p style="color:var(--ink3);font-size:13px;margin-bottom:14px">Tippe auf ein Feld zum Bearbeiten.</p>`;
+  D.essen.forEach(d => {
+    const isToday = d.tag===tn;
+    html += `<div class="card ${isToday?'today-card':''}">
+      <div class="card-title ${isToday?'today-label':''}" style="margin-bottom:12px">
+        ${d.tag}${isToday?' <span style="font-size:11px;font-weight:400;margin-left:6px;color:var(--accent)">• heute</span>':""}
+      </div>`;
+    MEALS.forEach(m => {
+      const val    = d[m.key]||"";
+      const isEdit = essenEdit && essenEdit.dayId===d.id && essenEdit.meal===m.key;
+      html += `<div class="essen-row">
+        <span class="essen-label">${m.label}</span>`;
+      if (isEdit) {
+        html += `<input class="essen-input" id="essen-inp"
+          value="${esc(essenEdit.val)}"
+          oninput="essenEdit.val=this.value"
+          onblur="commitEssen()"
+          onkeydown="if(event.key==='Enter')commitEssen()">`;
+      } else {
+        html += `<span class="essen-val ${val?'':'empty'}" onclick="startEssenEdit(${d.id},'${m.key}','${esc(val)}')">${val?esc(val):"Tippen zum Eintragen…"}</span>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById("pane-essen").innerHTML = html;
+  if (essenEdit) {
+    const inp = document.getElementById("essen-inp");
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length); }
+  }
+}
+
+function startEssenEdit(dayId,meal,val) { essenEdit={dayId,meal,val}; renderEssen(); }
+function commitEssen() {
+  if (!essenEdit) return;
+  D.essen = D.essen.map(d => d.id!==essenEdit.dayId?d:{...d,[essenEdit.meal]:essenEdit.val});
+  essenEdit = null; saveEssen();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  👶  HANNO
+// ══════════════════════════════════════════════════════════════════════════════
+function renderHanno() {
+  const h = D.hanno, w = h.windeln;
+  const pct    = Math.round((w.bestand/w.bestandMax)*100);
+  const wColor = pct>60?"#3a8c68":pct>30?"#b5820a":"#c0392b";
+  const wTag   = pct>60?"tag-green":pct>30?"tag-amber":"tag-red";
+  const PRIO   = {hoch:{cls:"tag-red",lbl:"🔴 Hoch"},mittel:{cls:"tag-amber",lbl:"🟡 Mittel"},niedrig:{cls:"tag-green",lbl:"🟢 Niedrig"}};
+
+  let html = `
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🧷 Windeln</div>
+      <span class="tag ${wTag}">${pct}% Füllstand${pct<30?" · ⚠️ Nachkaufen!":""}</span>
+    </div>
+    <div class="flex gap-12 flex-wrap mb-12">
+      <div style="flex:1;min-width:120px"><label class="field-label">Größe / Stufe</label>
+        <input class="field-input" value="${esc(w.stufe)}" oninput="updW('stufe',this.value)"></div>
+      <div style="flex:1;min-width:120px"><label class="field-label">Marke</label>
+        <input class="field-input" value="${esc(w.marke)}" oninput="updW('marke',this.value)"></div>
+      <div style="flex:1;min-width:100px"><label class="field-label">Bestand (Stk)</label>
+        <input class="field-input" type="number" value="${w.bestand}" oninput="updW('bestand',+this.value)"></div>
+      <div style="flex:1;min-width:100px"><label class="field-label">Ziel (Stk)</label>
+        <input class="field-input" type="number" value="${w.bestandMax}" oninput="updW('bestandMax',+this.value)"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="wpbar" style="width:${Math.min(pct,100)}%;background:${wColor}"></div></div>
+    <p style="font-size:12px;color:${wColor};margin-top:6px;font-weight:700">${w.bestand} von ${w.bestandMax} Windeln vorhanden</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title mb-12">👕 Kleidergrößen</div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th>Kleidungsstück</th><th>Aktuelle Größe</th><th>Nächste Größe</th><th>Notiz</th></tr></thead>
+        <tbody>`;
+  h.kleidergroessen.forEach(g => {
+    html += `<tr>
+      <td><strong>${esc(g.typ)}</strong></td>
+      <td><input class="tbl-input" style="width:80px" value="${esc(g.groesse)}" oninput="updG(${g.id},'groesse',this.value)"></td>
+      <td><input class="tbl-input" style="width:80px" value="${esc(g.naechste)}" oninput="updG(${g.id},'naechste',this.value)"></td>
+      <td><input class="tbl-input" style="width:140px" value="${esc(g.notiz)}" placeholder="Notiz…" oninput="updG(${g.id},'notiz',this.value)"></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🛍️ Anstehende Anschaffungen</div>
+      <button class="btn btn-ghost" onclick="toggleAddAn()">${showAddAn?"✕ Abbrechen":"+ Hinzufügen"}</button>
+    </div>`;
+  if (showAddAn) {
+    html += `<div class="add-box">
+      <div class="flex gap-8 flex-wrap mb-8">
+        <input id="an-name" class="field-input" style="flex:2;min-width:150px" placeholder="Bezeichnung *">
+        <select id="an-prio" class="field-input" style="flex:1;min-width:110px">
+          <option value="hoch">🔴 Hoch</option><option value="mittel" selected>🟡 Mittel</option><option value="niedrig">🟢 Niedrig</option>
+        </select>
+        <input id="an-preis" class="field-input" style="flex:1;min-width:90px" placeholder="Preis ca.">
+      </div>
+      <div class="flex gap-8">
+        <input id="an-notiz" class="field-input flex-1" placeholder="Notiz / Link">
+        <button class="btn btn-gold" onclick="saveAn()">✓ Speichern</button>
+      </div>
+    </div>`;
+  }
+  if (!h.anschaffungen.length) html += `<p class="empty-hint">Keine Anschaffungen geplant.</p>`;
+  h.anschaffungen.forEach(an => {
+    const p = PRIO[an.prioritaet]||PRIO.mittel;
+    html += `<div class="row-item" style="${an.erledigt?'opacity:.45':''}">
+      <button class="checkbox ${an.erledigt?'done':''}" onclick="toggleAn(${an.id})">${an.erledigt?"✓":""}</button>
+      <div style="flex:1">
+        <div class="flex-center gap-8 flex-wrap">
+          <span style="font-weight:700;${an.erledigt?'text-decoration:line-through;color:var(--ink2)':''}">${esc(an.name)}</span>
+          <span class="tag ${p.cls}">${p.lbl}</span>
+          ${an.preis?`<span style="font-size:12px;color:var(--ink3)">${esc(an.preis)}</span>`:""}
+        </div>
+        ${an.notiz?`<p style="font-size:12px;color:var(--ink3);margin-top:2px">${esc(an.notiz)}</p>`:""}
+      </div>
+      <button class="btn-x" onclick="delAn(${an.id})">✕</button>
+    </div>`;
+  });
+  html += `</div>
+  <div class="card">
+    <div class="card-title mb-12">📝 Notizen zu Hanno</div>
+    <textarea class="field-input" style="min-height:100px"
+      placeholder="Arzttermine, Meilensteine, Beobachtungen…"
+      oninput="updHannoNotiz(this.value)">${esc(h.notizen||"")}</textarea>
+  </div>`;
+
+  document.getElementById("pane-hanno").innerHTML = html;
+}
+
+function updW(f,v) {
+  D.hanno.windeln[f]=v;
+  scheduleSave(KEYS.hanno,D.hanno);
+  const pct=Math.round((D.hanno.windeln.bestand/D.hanno.windeln.bestandMax)*100);
+  const c=pct>60?"#3a8c68":pct>30?"#b5820a":"#c0392b";
+  const b=document.getElementById("wpbar");
+  if(b){b.style.width=Math.min(pct,100)+"%";b.style.background=c;}
+}
+function updG(id,f,v) {
+  D.hanno.kleidergroessen=D.hanno.kleidergroessen.map(g=>g.id===id?{...g,[f]:v}:g);
+  scheduleSave(KEYS.hanno,D.hanno);
+}
+function updHannoNotiz(v) { D.hanno.notizen=v; scheduleSave(KEYS.hanno,D.hanno); }
+function toggleAddAn() { showAddAn=!showAddAn; renderHanno(); }
+function saveAn() {
+  const name=document.getElementById("an-name").value.trim();
+  if(!name) return;
+  D.hanno.anschaffungen.push({id:uid(),name,prioritaet:document.getElementById("an-prio").value,preis:document.getElementById("an-preis").value.trim(),notiz:document.getElementById("an-notiz").value.trim(),erledigt:false});
+  showAddAn=false; saveHanno();
+}
+function toggleAn(id) {
+  D.hanno.anschaffungen=D.hanno.anschaffungen.map(a=>a.id===id?{...a,erledigt:!a.erledigt}:a);
+  saveHanno();
+}
+function delAn(id) { D.hanno.anschaffungen=D.hanno.anschaffungen.filter(a=>a.id!==id); saveHanno(); }
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
